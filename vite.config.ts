@@ -13,7 +13,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   // 部署到 GitHub Pages 项目页时用 `VITE_BASE=/<repo>/` 指定子路径；
   // 自定义域名 / 用户主页仓库（<user>.github.io）保持默认 '/' 即可。
-  base: process.env.VITE_BASE ?? '/',
+  base:
+    (globalThis as unknown as { process?: { env?: Record<string, string> } }).process?.env
+      ?.VITE_BASE ?? '/',
   plugins: [react()],
   server: {
     host: true,
