@@ -1,7 +1,9 @@
 /**
  * ScoreRing —— 环形分数可视化（纯 SVG）。
  *
- * v2：环形渐变 + 端点辉光 + 中心数字，分数段决定色相。
+ * v4：参考稿的分数是"青柠大数字 + 极细轨道"，所以环只留 4px 弧，
+ * 轨道压在 white/10 上，弧用青柠渐变（低分段才偏红）。
+ * onDark 决定文字与轨道色，深色卡上是默认用法。
  */
 
 import { clampScore } from '../utils/format';
@@ -11,34 +13,37 @@ export interface ScoreRingProps {
   score: number;
   /** 直径（px），默认 160 */
   size?: number;
-  /** 环粗（px），默认 12 */
+  /** 环粗（px），默认 4 */
   strokeWidth?: number;
   /** 中心说明文字 */
   label?: string;
+  /** 是否放在深色底上 */
+  onDark?: boolean;
 }
 
 /** 分数段 → 渐变色 */
 function palette(score: number): [string, string] {
   if (score >= 85) {
-    return ['#6EE7B7', '#10B981'];
+    return ['#E4FA9E', '#C9F26B'];
   }
   if (score >= 70) {
-    return ['#86EFAC', '#22C55E'];
+    return ['#DCF7A0', '#A9D93F'];
   }
   if (score >= 50) {
-    return ['#FDE68A', '#F59E0B'];
+    return ['#EFD79A', '#C79A3E'];
   }
-  return ['#FCA5A5', '#EF4444'];
+  return ['#E8A9A2', '#C4574B'];
 }
 
 export function ScoreRing({
   score,
-  size = 160,
-  strokeWidth = 12,
+  size = 168,
+  strokeWidth = 4,
   label = '综合评分',
+  onDark = true,
 }: ScoreRingProps): JSX.Element {
   const safeScore = clampScore(score, 0, 100);
-  const radius = (size - strokeWidth) / 2;
+  const radius = (size - strokeWidth) / 2 - 6;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - safeScore / 100);
   const [from, to] = palette(safeScore);
@@ -51,10 +56,6 @@ export function ScoreRing({
       role="img"
       aria-label={`${label} ${safeScore} 分`}
     >
-      <div
-        className="absolute inset-3 rounded-full blur-2xl"
-        style={{ background: `radial-gradient(circle, ${to}22, transparent 70%)` }}
-      />
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -67,7 +68,7 @@ export function ScoreRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,.06)"
+          stroke={onDark ? 'rgba(255,255,255,.12)' : '#ECF0EB'}
           strokeWidth={strokeWidth}
         />
         <circle
@@ -80,17 +81,24 @@ export function ScoreRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          style={{
-            transition: 'stroke-dashoffset .8s cubic-bezier(.16,1,.3,1)',
-            filter: `drop-shadow(0 0 10px ${to}55)`,
-          }}
+          style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.16,1,.3,1)' }}
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="num text-[2.6rem] font-semibold leading-none tracking-tight text-white">
+        <span
+          className={`num text-[2.9rem] font-semibold leading-none tracking-[-.04em] ${
+            onDark ? 'text-lime' : 'text-ink-900'
+          }`}
+        >
           {safeScore}
         </span>
-        <span className="mt-2 text-[11px] tracking-wide text-white/40">{label}</span>
+        <span
+          className={`mt-2.5 text-[9.5px] uppercase tracking-[.2em] ${
+            onDark ? 'text-white/40' : 'text-ink-400'
+          }`}
+        >
+          {label}
+        </span>
       </div>
     </div>
   );

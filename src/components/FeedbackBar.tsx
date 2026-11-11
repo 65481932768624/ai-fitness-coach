@@ -1,7 +1,8 @@
 /**
- * FeedbackBar —— 底部当前提示文字条。
+ * FeedbackBar —— 视频下方当前提示文字条。
  *
- * 有提示时显示文案（error 红色 / warn 黄色），无提示时显示鼓励语。
+ * v4：白底细胶囊 + 一个状态点。提示是"系统在安静地播报"，
+ * 所以除了那个点，颜色不参与表达——错误用文字与点的颜色区分就够了。
  */
 
 import { AlertTriangle, Info, ThumbsUp } from 'lucide-react';
@@ -22,24 +23,29 @@ export function FeedbackBar({
 }: FeedbackBarProps): JSX.Element {
   if (!message) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-xl border border-base-700 bg-base-900/80 px-4 py-3 text-sm text-gray-400 backdrop-blur">
-        <ThumbsUp size={16} className="text-accent" />
+      <div className="flex items-center justify-center gap-2 rounded-full border border-line bg-paper-pure px-5 py-2.5 text-[12.5px] text-ink-500">
+        <ThumbsUp size={13} className="text-lime-deep" strokeWidth={2} />
         <span>{idleText}</span>
       </div>
     );
   }
 
   const Icon = isError ? AlertTriangle : Info;
-  const tone = isError
-    ? 'border-danger/50 bg-danger/10 text-red-200'
-    : 'border-warn/50 bg-warn/10 text-amber-200';
 
   return (
     <div
       key={message}
-      className={`flex animate-slide-up items-center justify-center gap-2 rounded-xl border px-4 py-3 text-base font-medium backdrop-blur ${tone}`}
+      className={`flex animate-slide-up items-center justify-center gap-2 rounded-full border px-5 py-2.5 text-[12.5px] font-medium ${
+        isError
+          ? 'border-danger/25 bg-danger/[.05] text-danger'
+          : 'border-line bg-paper-pure text-ink-800'
+      }`}
     >
-      <Icon size={18} />
+      <Icon
+        size={13}
+        strokeWidth={2.2}
+        className={isError ? 'text-danger' : 'text-warn'}
+      />
       <span>{message}</span>
     </div>
   );

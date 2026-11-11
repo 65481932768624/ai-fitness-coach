@@ -30,6 +30,14 @@ export const TARGET_FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
 const BASE_URL: string =
   (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
 
+/** 静态资源目录（public/media 下的实拍图，跟随部署子路径） */
+export const MEDIA_BASE = `${BASE_URL}media/`;
+
+/** 拼一张实拍图的地址，例如 media('hero-field.jpg') */
+export function media(file: string): string {
+  return `${MEDIA_BASE}${file}`;
+}
+
 /** 默认模型路径（本地优先，跟随部署子路径） */
 export const LOCAL_MODEL_PATH = `${BASE_URL}models/pose_landmarker_lite.task`;
 

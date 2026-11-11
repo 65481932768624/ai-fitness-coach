@@ -1,7 +1,9 @@
 /**
  * ActionSelectPage —— 动作库。
  *
- * v2：加部位筛选（动作变多之后必须能筛），筛选状态只在本地，不写 URL。
+ * v4：按参考稿做成"一张干净的目录页"：居中大标题 + 一行说明，
+ * 筛选是白底胶囊、选中反色成墨绿；卡片网格只留发丝线与极浅投影，
+ * 标题上方那个青色小标签是这一页唯一的装饰。
  */
 
 import { useMemo, useState } from 'react';
@@ -38,52 +40,61 @@ export function ActionSelectPage(): JSX.Element {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="eyebrow">动作库</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">选择训练动作</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/45">
-            站在摄像头前，保持全身入镜。侧对镜头 45° 通常能拍到最清楚的关节角度。
-          </p>
+      <div className="mx-auto max-w-[860px] pt-6 text-center sm:pt-10">
+        <p className="eyebrow justify-center">动作库</p>
+        <h1 className="display mt-6 text-[34px] leading-[1.15] sm:text-[48px]">选择训练动作</h1>
+        <p className="mx-auto mt-5 max-w-[560px] text-[13.5px] leading-[1.85] text-ink-500 sm:text-[14.5px]">
+          站在镜头前，保持全身入镜。相对镜头 45° 最能拍摄到清晰的关节角度。
+        </p>
+      </div>
+
+      <div className="mt-11 flex flex-col items-center gap-4 border-b border-line pb-5 sm:flex-row sm:justify-between">
+        <div
+          className="no-scrollbar -mx-4 flex w-[calc(100%+2rem)] items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:w-auto sm:px-0"
+          role="tablist"
+          aria-label="按部位筛选"
+        >
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setFilter(f.key)}
+                className={`tab-pill shrink-0 ${active ? 'tab-pill-active' : ''}`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
         </div>
-        <span className="text-xs text-white/30">
+
+        <span className="text-[11.5px] text-ink-400">
           共 {list.length} 个动作 · {EXERCISE_LIST.filter((e) => e.supported).length} 个可用
         </span>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-2" role="tablist" aria-label="按部位筛选">
-        {FILTERS.map((f) => {
-          const active = filter === f.key;
-          return (
-            <button
-              key={f.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setFilter(f.key)}
-              className={`rounded-full border px-4 py-1.5 text-[13px] font-medium transition-colors ${
-                active
-                  ? 'border-accent/40 bg-accent/10 text-accent-soft'
-                  : 'border-white/[0.07] bg-white/[0.03] text-white/45 hover:text-white/80'
-              }`}
-            >
-              {f.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((exercise) => (
           <ExerciseCard key={exercise.id} exercise={exercise} onSelect={handleSelect} />
         ))}
       </div>
 
       {list.length === 0 && (
-        <div className="card-surface mt-8 p-10 text-center text-sm text-white/40">
+        <div className="mt-7 rounded-card border border-line-soft bg-paper-soft py-16 text-center text-[13px] text-ink-400">
           这个部位还没有动作，换一个筛选试试。
         </div>
       )}
+
+      <div className="mx-auto mt-14 flex max-w-[520px] items-start gap-3 rounded-card border border-line-soft bg-paper-soft px-5 py-4">
+        <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-lime-deep" />
+        <p className="text-[11.5px] leading-[1.9] text-ink-400">
+          镜头高度与胸口齐平，距离 2–3 米，背景尽量干净，姿态识别的稳定性会明显提升。
+          所有检测与判断逻辑都在本机完成，不上传任何视频。
+        </p>
+      </div>
     </Layout>
   );
 }

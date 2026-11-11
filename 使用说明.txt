@@ -1,0 +1,48 @@
+﻿AI 健身教练 · 完整项目（浅色版）
+====================================================
+
+这是一个可以直接运行的完整前端项目，不是替换文件包。
+
+一、怎么跑起来（三步）
+1. 安装 Node.js 18 或更高版本（推荐 20 LTS）：https://nodejs.org/
+2. 在解压后的项目根目录打开终端，安装依赖：
+       npm install
+3. 启动开发服务器：
+       npm run dev
+   终端会打印一个地址（通常是 http://localhost:5173 ），浏览器打开即可。
+
+二、要打包给别人看 / 部署
+    npm run build
+产物在 dist/ 目录，可直接放到任意静态服务器。
+项目内已附带 scripts/deploy-pages.sh（部署到 GitHub Pages 用）。
+
+三、注意事项
+1. 摄像头权限：浏览器只允许在 HTTPS 或 localhost 下访问摄像头。
+   本地 npm run dev 走 localhost 没问题；如果换成局域网 IP（如 http://192.168.x.x:5173）
+   会拿不到摄像头权限，这是浏览器限制，不是代码问题。
+2. 姿态识别模型不要删：public/models/pose_landmarker_lite.task（5.6MB）。
+   这是 MediaPipe 的姿态关键点模型，本地随包提供，不需要联网下载。
+   删掉它摄像头页面会无法识别动作。
+3. 首次运行需要联网：npm install 要拉取依赖包。
+   装完之后再运行就不需要网络了。
+
+四、技术栈
+   Vite 5 + React 18 + TypeScript 5 + Tailwind CSS 3 + react-router-dom 6
+   姿态识别 @mediapipe/tasks-vision
+
+五、页面结构
+   /                首页
+   /exercises       动作库（深蹲 / 俯卧撑 / 平板支撑）
+   /training/:id    实时训练页（摄像头 + 骨架叠加 + 语音纠正）
+   /result          成绩页
+
+五、本包配色
+   纸白底 #F1F3F1 / 白卡 #FFFFFF / 墨绿文字 #0E1A1B / 强调色荧光青柠 #C9F26B
+   主按钮为墨绿实心；首页 Hero 为实拍照片满幅 + 双层压暗。
+
+六、本次改版说明
+只改了视觉层：设计令牌（tailwind.config.ts + src/index.css）、组件样式、配色、
+以及首页 Hero 改为实拍图。业务逻辑未改动：
+   src/engine（除 canvasRenderer.ts 的配色）、src/hooks、src/store、
+   src/utils、src/types、src/exercises、src/speech 均为原版。
+npm run build（含 TypeScript 类型检查）已验证通过。

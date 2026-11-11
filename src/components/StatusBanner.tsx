@@ -1,7 +1,9 @@
 /**
  * StatusBanner —— 异常态提示条（未检测到人 / 摄像头错误 / 模型加载中）。
  *
- * 居中悬浮在视频之上，仅在需要时显示。
+ * v4：参考稿里"正在识别动作"是一枚白胶囊 + 青柠点，压在画面正中。
+ * 沿用这个做法：白实心胶囊负责可读性，状态只由左侧那个点的颜色表达，
+ * 整块彩色底会立刻把画面拉廉价。
  */
 
 import { AlertCircle, Loader2, UserX } from 'lucide-react';
@@ -22,29 +24,30 @@ export function StatusBanner({ visible, kind, message }: StatusBannerProps): JSX
     return null;
   }
 
-  const toneMap: Record<StatusBannerKind, string> = {
-    info: 'border-info/50 bg-info/10 text-sky-200',
-    warn: 'border-warn/50 bg-warn/10 text-amber-200',
-    error: 'border-danger/50 bg-danger/10 text-red-200',
-    loading: 'border-base-600 bg-base-900/80 text-gray-200',
-  };
+  const dot =
+    kind === 'error'
+      ? 'bg-danger'
+      : kind === 'warn'
+        ? 'bg-warn'
+        : kind === 'loading'
+          ? 'bg-aqua-deep'
+          : 'bg-lime-deep';
 
   const icon =
     kind === 'loading' ? (
-      <Loader2 size={20} className="animate-spin" />
+      <Loader2 size={13} className="animate-spin text-[#4A6365]" />
     ) : kind === 'error' ? (
-      <AlertCircle size={20} />
-    ) : (
-      <UserX size={20} />
-    );
+      <AlertCircle size={13} className="text-danger" />
+    ) : kind === 'warn' ? (
+      <UserX size={13} className="text-warn" />
+    ) : null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-      <div
-        className={`flex max-w-[80%] items-center gap-2.5 rounded-xl border px-5 py-3 text-sm font-medium backdrop-blur ${toneMap[kind]}`}
-      >
-        {icon}
-        <span>{message}</span>
+    <div className="pointer-events-none absolute inset-0 flex items-end justify-center px-4 pb-4 sm:items-center sm:px-6 sm:pb-0">
+      <div className="glass-light flex max-w-full items-center gap-2 rounded-full px-4 py-2 shadow-[0_18px_44px_-26px_rgba(0,0,0,.9)]">
+        {kind === 'loading' ? icon : <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />}
+        {kind === 'loading' ? null : icon}
+        <span className="text-[12px] font-medium leading-relaxed text-ink-800">{message}</span>
       </div>
     </div>
   );

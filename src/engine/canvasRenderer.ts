@@ -57,7 +57,9 @@ export class CanvasRenderer {
     }
 
     // 1. 画骨架连线
-    ctx.lineWidth = Math.max(2, width / 320);
+    // v4：画面是深色承载，所以骨架回归"白线"——但白线在明亮画面（窗户逆光）里会消失，
+    // 所以先描一层深墨绿的"影子线"再叠白线，任何背景下都能看清。
+    const lineWidth = Math.max(2, width / 320);
     ctx.lineCap = 'round';
     for (const [i, j] of SKELETON_CONNECTIONS) {
       const p1 = landmarks[i];
@@ -66,14 +68,27 @@ export class CanvasRenderer {
         continue;
       }
       const visible = p1.visibility >= VISIBILITY_THRESHOLD && p2.visibility >= VISIBILITY_THRESHOLD;
-      ctx.strokeStyle = visible ? 'rgba(34, 197, 94, 0.9)' : 'rgba(120, 140, 160, 0.25)';
+      const x1 = p1.x * width;
+      const y1 = p1.y * height;
+      const x2 = p2.x * width;
+      const y2 = p2.y * height;
+
+      ctx.lineWidth = lineWidth + 2.5;
+      ctx.strokeStyle = visible ? 'rgba(5, 14, 16, 0.42)' : 'rgba(5, 14, 16, 0.16)';
       ctx.beginPath();
-      ctx.moveTo(p1.x * width, p1.y * height);
-      ctx.lineTo(p2.x * width, p2.y * height);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = visible ? 'rgba(255, 255, 255, 0.94)' : 'rgba(255, 255, 255, 0.22)';
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
       ctx.stroke();
     }
 
-    // 2. 画关键点
+    // 2. 画关键点：正常态用青柠（品牌的色只落在关节上），违规关节转红
     const radius = Math.max(3, width / 220);
     for (let i = 0; i < landmarks.length; i += 1) {
       const p = landmarks[i];
@@ -82,11 +97,14 @@ export class CanvasRenderer {
       }
       const isBad = highlight.has(i);
       ctx.beginPath();
-      ctx.arc(p.x * width, p.y * height, isBad ? radius * 1.8 : radius, 0, Math.PI * 2);
-      ctx.fillStyle = isBad ? '#EF4444' : '#F8FAFC';
+      ctx.arc(p.x * width, p.y * height, isBad ? radius * 1.7 : radius, 0, Math.PI * 2);
+      ctx.fillStyle = isBad ? '#F0857C' : '#C9F26B';
       ctx.fill();
+      ctx.strokeStyle = isBad ? 'rgba(176, 74, 68, 0.9)' : 'rgba(5, 14, 16, 0.35)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
       if (isBad) {
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+        ctx.strokeStyle = 'rgba(240, 133, 124, 0.55)';
         ctx.lineWidth = Math.max(2, width / 260);
         ctx.beginPath();
         ctx.arc(p.x * width, p.y * height, radius * 3, 0, Math.PI * 2);

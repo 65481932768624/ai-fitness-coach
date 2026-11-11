@@ -82,11 +82,16 @@ export function ExerciseGlyph({ id, size = 24, className }: ExerciseGlyphProps):
   );
 }
 
-/** 部位配色（图标底色 / 前景） */
+/**
+ * 部位配色（图标底 / 前景 / 圆点）。
+ *
+ * v4：白卡上的图标块走"极浅灰绿底 + 深墨绿线"，只有圆点带一点色相，
+ * 这样三张卡并排时不会变成三种颜色在抢戏——强调色留给青柠，别分给它。
+ */
 export const BODY_TONE: Record<string, { bg: string; text: string; dot: string }> = {
-  legs: { bg: 'bg-accent/12', text: 'text-accent', dot: 'bg-accent' },
-  chest: { bg: 'bg-sky-400/12', text: 'text-sky-300', dot: 'bg-sky-400' },
-  core: { bg: 'bg-amber-400/12', text: 'text-amber-300', dot: 'bg-amber-400' },
+  legs: { bg: 'bg-[#EFF3E6]', text: 'text-[#58712C]', dot: 'bg-[#A9D93F]' },
+  chest: { bg: 'bg-[#E9EFEE]', text: 'text-[#2C5450]', dot: 'bg-[#5FA79A]' },
+  core: { bg: 'bg-[#F2EEE6]', text: 'text-[#7A6338]', dot: 'bg-[#C4A46B]' },
 };
 
 export default ExerciseGlyph;
