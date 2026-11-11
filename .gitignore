@@ -32,3 +32,7 @@ pnpm-debug.log*
 
 # GitHub Pages 工作树
 .gh-pages/
+
+# 构建产物
+tests/*.bundle.mjs
+*.tsbuildinfo

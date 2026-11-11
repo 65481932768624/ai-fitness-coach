@@ -38,19 +38,6 @@ export function formatPercent(ratio: number): string {
 }
 
 /**
- * 分数取整并按范围约束。
- * @param score 原始分数
- * @param min 下限，默认 0
- * @param max 上限，默认 100
- */
-export function clampScore(score: number, min = 0, max = 100): number {
-  if (!Number.isFinite(score)) {
-    return min;
-  }
-  return Math.round(Math.min(max, Math.max(min, score)));
-}
-
-/**
  * 数值区间约束。
  */
 export function clamp(value: number, min: number, max: number): number {

@@ -41,9 +41,9 @@ const CAPABILITIES = [
 const HERO_CHIPS = ['33 关键点', '角度判定', '语音纠正', '本地计算'];
 
 const STATS = [
-  { value: '33', unit: '分钟', label: '单次训练时长' },
-  { value: '30', unit: '次', label: '一组完成次数' },
-  { value: '0', unit: '组', label: '需要的器械' },
+  { value: '33', unit: '个', label: '身体关键点' },
+  { value: '30', unit: 'fps', label: '每秒判定次数' },
+  { value: '0', unit: 'KB', label: '上传到云端' },
 ];
 
 export function HomePage(): JSX.Element {
@@ -147,7 +147,8 @@ export function HomePage(): JSX.Element {
             return (
               <div
                 key={s.label}
-                className={`rounded-[16px] px-4 py-4 sm:px-7 sm:py-5 ${
+                tabIndex={0}
+                className={`stat-card rounded-[16px] px-4 py-4 sm:px-7 sm:py-5 ${
                   accent ? 'bg-lime' : 'bg-paper-pure shadow-[0_18px_40px_-28px_rgba(11,21,23,.45)]'
                 }`}
               >
