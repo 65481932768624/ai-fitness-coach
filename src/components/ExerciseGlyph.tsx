@@ -41,6 +41,17 @@ const PATHS: Record<string, JSX.Element> = {
       <path d="M3 19.4h18" strokeDasharray="1.5 2.4" opacity="0.4" />
     </>
   ),
+  pulldown: (
+    <>
+      <path d="M3.2 4.2h17.6" />
+      <circle cx="12" cy="8.6" r="1.9" fill="currentColor" stroke="none" />
+      <path d="M5.8 4.6 9.8 9.6" />
+      <path d="M18.2 4.6 14.2 9.6" />
+      <path d="M12 10.6v4" />
+      <path d="M12 14.6 8.8 17.4V20.2" />
+      <path d="M12 14.6 15.2 17.4V20.2" />
+    </>
+  ),
   plank: (
     <>
       <circle cx="4.6" cy="10.2" r="2.1" fill="currentColor" stroke="none" />
@@ -92,6 +103,7 @@ export const BODY_TONE: Record<string, { bg: string; text: string; dot: string }
   legs: { bg: 'bg-[#EFF3E6]', text: 'text-[#58712C]', dot: 'bg-[#A9D93F]' },
   chest: { bg: 'bg-[#E9EFEE]', text: 'text-[#2C5450]', dot: 'bg-[#5FA79A]' },
   core: { bg: 'bg-[#F2EEE6]', text: 'text-[#7A6338]', dot: 'bg-[#C4A46B]' },
+  back: { bg: 'bg-[#EEECF6]', text: 'text-[#4C4370]', dot: 'bg-[#8E7CC3]' },
 };
 
 export default ExerciseGlyph;

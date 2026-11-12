@@ -20,6 +20,7 @@ const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: 'legs', label: '下肢' },
   { key: 'chest', label: '上肢' },
   { key: 'core', label: '核心' },
+  { key: 'back', label: '背部' },
 ];
 
 export function ActionSelectPage(): JSX.Element {

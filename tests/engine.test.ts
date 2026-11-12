@@ -567,10 +567,10 @@ test('scoreHold 非法达标率（NaN/超范围）被钳制', () => {
 
 suite('T3 扩展性验证');
 
-test('注册表包含 3 个动作且 id 一致', () => {
+test('注册表包含 4 个动作且 id 一致', () => {
   const ids = Object.keys(EXERCISE_REGISTRY).sort();
-  assertEqual(ids.join(','), 'plank,pushup,squat', '注册表应含 squat/pushup/plank');
-  assertEqual(EXERCISE_LIST.length, 3, '动作列表应有 3 项');
+  assertEqual(ids.join(','), 'plank,pulldown,pushup,squat', '注册表应含 squat/pushup/plank/pulldown');
+  assertEqual(EXERCISE_LIST.length, 4, '动作列表应有 4 项');
 });
 
 test('getExercise 按 id 返回配置，未知 id 返回 null', () => {

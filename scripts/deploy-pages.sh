@@ -13,7 +13,7 @@ node scripts/build-pages.mjs "$REPO"
 
 echo "[deploy] 2/4 准备 gh-pages 工作树"
 git fetch origin gh-pages >/dev/null 2>&1 || true
-git worktree remove .gh-pages --force >/dev/null 2>&1 || true
+git worktree remove .gh-pages >/dev/null 2>&1 || true
 rm -rf .gh-pages
 git worktree add --detach .gh-pages origin/gh-pages >/dev/null
 
@@ -31,6 +31,6 @@ fi
 echo "[deploy] 4/4 推送 gh-pages"
 git push origin HEAD:gh-pages
 cd ..
-git worktree remove .gh-pages --force
+git worktree remove .gh-pages
 
 echo "[deploy] 完成：https://$(git config --get remote.origin.url | sed -E 's#.*github.com[:/]([^/]+)/.*#\1#').github.io/$REPO/"

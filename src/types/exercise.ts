@@ -8,7 +8,7 @@
 import type { LandmarkIndex } from './pose';
 
 /** 支持的动作用户端 ID */
-export type ExerciseId = 'squat' | 'pushup' | 'plank';
+export type ExerciseId = 'squat' | 'pushup' | 'plank' | 'pulldown';
 
 /** 三点组合：以 b 为顶点计算 a-b-c 夹角 */
 export interface JointTriple {
@@ -106,7 +106,7 @@ export interface ExerciseConfig {
   /** 英文名 */
   nameEn: string;
   /** 目标部位 */
-  bodyPart: 'legs' | 'chest' | 'core';
+  bodyPart: 'legs' | 'chest' | 'core' | 'back';
   /** 难度 1-3 */
   difficulty: 1 | 2 | 3;
   /** 是否已支持（false 在选择页显示「即将支持」） */

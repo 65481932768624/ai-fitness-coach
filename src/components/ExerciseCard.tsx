@@ -22,6 +22,7 @@ const BODY_PART_LABEL: Record<ExerciseConfig['bodyPart'], string> = {
   legs: '下肢',
   chest: '上肢 / 胸',
   core: '核心',
+  back: '背部',
 };
 
 /** 模式中文名 */
