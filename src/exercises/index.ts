@@ -10,6 +10,7 @@
 import type { ExerciseConfig, ExerciseId } from '../types/exercise';
 import { plankConfig } from './plank';
 import { pulldownConfig } from './pulldown';
+import { benchPressConfig } from './benchpress';
 import { pushupConfig } from './pushup';
 import { squatConfig } from './squat';
 
@@ -19,6 +20,7 @@ export const EXERCISE_REGISTRY: Record<ExerciseId, ExerciseConfig> = {
   pushup: pushupConfig,
   plank: plankConfig,
   pulldown: pulldownConfig,
+  benchpress: benchPressConfig,
 };
 
 /** 按顺序导出的动作列表（供首页 / 选择页遍历渲染） */

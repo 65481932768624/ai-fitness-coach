@@ -8,7 +8,7 @@
 import type { LandmarkIndex } from './pose';
 
 /** 支持的动作用户端 ID */
-export type ExerciseId = 'squat' | 'pushup' | 'plank' | 'pulldown';
+export type ExerciseId = 'squat' | 'pushup' | 'plank' | 'pulldown' | 'benchpress';
 
 /** 三点组合：以 b 为顶点计算 a-b-c 夹角 */
 export interface JointTriple {

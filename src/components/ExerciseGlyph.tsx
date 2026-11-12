@@ -41,6 +41,17 @@ const PATHS: Record<string, JSX.Element> = {
       <path d="M3 19.4h18" strokeDasharray="1.5 2.4" opacity="0.4" />
     </>
   ),
+  benchpress: (
+    <>
+      <path d="M3.4 4h17.2" />
+      <circle cx="6.2" cy="10.2" r="1.8" fill="currentColor" stroke="none" />
+      <path d="M8 11 16.4 12.8" />
+      <path d="M8.4 10.8 7.6 5" />
+      <path d="M10.4 11.2 11.4 5" />
+      <path d="M4 16.8h16" />
+      <path d="M16.4 12.8 19 16.8" />
+    </>
+  ),
   pulldown: (
     <>
       <path d="M3.2 4.2h17.6" />
