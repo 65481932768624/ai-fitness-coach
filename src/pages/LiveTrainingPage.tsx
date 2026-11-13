@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, Gauge, Repeat } from 'lucide-react';
 import { CameraView } from '../components/CameraView';
+import { MotionFigure } from '../components/MotionFigure';
 import { ControlBar } from '../components/ControlBar';
 import { FeedbackBar } from '../components/FeedbackBar';
 import { Layout } from '../components/Layout';
@@ -265,6 +266,24 @@ export function LiveTrainingPage(): JSX.Element {
         </div>
 
         <aside className="flex flex-col gap-3">
+          <div className="rounded-card border border-line bg-paper-pure p-5">
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-[9.5px] uppercase tracking-[.2em] text-ink-400">标准动作演示</h2>
+              <span className="text-[9.5px] text-ink-300">矢量 · 实时插值</span>
+            </div>
+            <div className="mt-2 flex justify-center text-ink-700">
+              <MotionFigure
+                exerciseId={config.id}
+                size={196}
+                accent="#A9D93F"
+                stroke="currentColor"
+              />
+            </div>
+            <p className="mt-1 text-center text-[10.5px] leading-relaxed text-ink-400">
+              循环演示发力轨迹，对照自己镜头的关节角度
+            </p>
+          </div>
+
           <div className="rounded-card border border-line bg-paper-pure p-5">
             <h2 className="text-[9.5px] uppercase tracking-[.2em] text-ink-400">动作要点</h2>
             <ul className="mt-3.5 space-y-2.5">
