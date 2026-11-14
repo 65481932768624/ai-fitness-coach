@@ -22,6 +22,8 @@ import { FeedbackManager } from '../src/engine/feedbackManager';
 import { EXERCISE_REGISTRY, EXERCISE_LIST, getExercise, isExerciseId } from '../src/exercises/index';
 import { squatConfig } from '../src/exercises/squat';
 import { TRIPLES } from '../src/constants/landmarks';
+import { isMirroredFacing, resolveFacing } from '../src/utils/cameraFacing';
+import { isSameSettings } from '../src/hooks/useSpeech';
 import type { Landmark } from '../src/types/pose';
 import type { ExerciseConfig } from '../src/types/exercise';
 
@@ -561,6 +563,142 @@ test('scoreHold 非法达标率（NaN/超范围）被钳制', () => {
   assertEqual(se.scoreHold(-1), 0, '<0 钳制到 0');
 });
 
+/* ------------------------------------------------------------------ */
+/* T2.6 权重扣分（传入 rules 时启用）                                  */
+/* ------------------------------------------------------------------ */
+
+suite('T2.6 权重扣分 (weighted scoring)');
+
+test('未传 rules 时保持固定扣分（向后兼容）', () => {
+  const se = new ScoringEngine(squatConfig.scoring);
+  assertEqual(se.isWeighted(), false, '不传 rules 应为固定扣分模式');
+  const v = [{ ruleId: 'knee-depth', label: 'a', severity: 'warn' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  assertEqual(se.scoreRep(v), 94, '仍按 warnPenalty=6 扣');
+});
+
+test('传 rules 时进入加权模式', () => {
+  const se = new ScoringEngine(squatConfig.scoring, squatConfig.rules);
+  assertEqual(se.isWeighted(), true, '传 rules 应启用加权');
+  assertEqual(se.scoreRep([]), 100, '无违规仍是满分');
+});
+
+test('权重高的规则扣分多于权重低的规则', () => {
+  const se = new ScoringEngine(squatConfig.scoring, squatConfig.rules);
+  const mk = (ruleId: string) => [{ ruleId, label: ruleId, severity: 'error' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  // 深蹲权重：knee-depth 30 / hip-angle 25 / torso-lean 25 / knee-valgus 20
+  const heavy = se.scoreRep(mk('knee-depth')); // weight 30
+  const light = se.scoreRep(mk('knee-valgus')); // weight 20
+  assertEqual(heavy < light, true, `权重 30 扣分应多于权重 20（实际 ${heavy} < ${light}）`);
+});
+
+test('同权重规则扣分相同', () => {
+  const se = new ScoringEngine(squatConfig.scoring, squatConfig.rules);
+  const mk = (ruleId: string) => [{ ruleId, label: ruleId, severity: 'error' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  // hip-angle 25 与 torso-lean 25 同权重
+  assertEqual(se.scoreRep(mk('hip-angle')), se.scoreRep(mk('torso-lean')), '同权重扣分应一致');
+});
+
+test('error 扣分重于 warn（同权重下）', () => {
+  const se = new ScoringEngine(squatConfig.scoring, squatConfig.rules);
+  const err = [{ ruleId: 'knee-depth', label: 'a', severity: 'error' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  const warn = [{ ruleId: 'knee-depth', label: 'a', severity: 'warn' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  assertEqual(se.scoreRep(err) < se.scoreRep(warn), true, 'error 应比 warn 扣得多');
+});
+
+test('深蹲 4 条规则全中：扣分总量与历史固定算法同量级', () => {
+  const se = new ScoringEngine(squatConfig.scoring, squatConfig.rules);
+  const all = squatConfig.rules.map((r) => ({
+    ruleId: r.id,
+    label: r.label,
+    severity: r.severity,
+    message: '',
+    actualAngle: 0,
+    targetRange: [0, 1] as [number, number],
+    timestampMs: 0,
+  }));
+  const score = se.scoreRep(all);
+  // 历史固定算法：error 12×2 + warn 6×2 = 36 → 64 分。加权后应贴近这个量级（±8）
+  assertEqual(Math.abs(score - 64) <= 8, true, `全违规得分为 ${score}，应接近历史 64 分（±8）`);
+});
+
+test('未知 ruleId 退回平均权重，不被当成 0 扣分', () => {
+  const se = new ScoringEngine(squatConfig.scoring, squatConfig.rules);
+  const v = [{ ruleId: 'not-in-config', label: 'x', severity: 'error' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  assertEqual(se.scoreRep(v) < 100, true, '未知规则仍应扣分');
+});
+
+test('权重全为 0 的脏配置退回固定扣分', () => {
+  const zeroRules = squatConfig.rules.map((r) => ({ ...r, weight: 0 }));
+  const se = new ScoringEngine(squatConfig.scoring, zeroRules);
+  assertEqual(se.isWeighted(), false, '总权重为 0 应退回固定模式');
+  const v = [{ ruleId: 'knee-depth', label: 'a', severity: 'warn' as const, message: '', actualAngle: 0, targetRange: [0, 1] as [number, number], timestampMs: 0 }];
+  assertEqual(se.scoreRep(v), 94, '应回到 warnPenalty=6');
+});
+
+/* ------------------------------------------------------------------ */
+/* T2.7 摄像头朝向与镜像（纯函数）                                     */
+/* ------------------------------------------------------------------ */
+
+suite('T2.7 摄像头朝向与镜像 (cameraFacing)');
+
+test('getSettings 报 environment → 后置且不镜像', () => {
+  assertEqual(resolveFacing('environment', undefined), 'environment', '应判定为后置');
+  assertEqual(isMirroredFacing('environment'), false, '后置不应镜像');
+});
+
+test('getSettings 报 user → 前置且镜像', () => {
+  assertEqual(resolveFacing('user', undefined), 'user', '应判定为前置');
+  assertEqual(isMirroredFacing('user'), true, '前置应镜像');
+});
+
+test('facingMode 缺失时按 label 关键词判定后置', () => {
+  assertEqual(resolveFacing(undefined, 'HD Back Camera'), 'environment', 'Back → 后置');
+  assertEqual(resolveFacing(undefined, '后置摄像头'), 'environment', '中文后置 → 后置');
+  assertEqual(isMirroredFacing(resolveFacing(undefined, 'Rear Camera')), false, 'Rear 不镜像');
+});
+
+test('facingMode 缺失时按 label 关键词判定前置', () => {
+  assertEqual(resolveFacing(undefined, 'FaceTime HD Camera'), 'user', 'FaceTime → 前置');
+  assertEqual(resolveFacing(undefined, '前置摄像头'), 'user', '中文前置 → 前置');
+  assertEqual(isMirroredFacing(resolveFacing(undefined, 'Front Camera')), true, '前置镜像');
+});
+
+test('无法判定时返回 unknown 但默认镜像（笔记本前置居多）', () => {
+  assertEqual(resolveFacing(undefined, 'USB2.0 UVC PC Camera'), 'unknown', '普通外接摄像头 → unknown');
+  assertEqual(resolveFacing(undefined, undefined), 'unknown', '无信息 → unknown');
+  assertEqual(isMirroredFacing('unknown'), true, 'unknown 默认镜像');
+});
+
+test('label 同时含前后置关键词时判为 unknown，避免误判', () => {
+  assertEqual(resolveFacing(undefined, 'Front Back Dual Camera'), 'unknown', '冲突关键词 → unknown');
+});
+
+/* ------------------------------------------------------------------ */
+/* T2.8 语音设置写盘判定（挂载不写）                                   */
+/* ------------------------------------------------------------------ */
+
+suite('T2.8 语音设置写盘判定 (isSameSettings)');
+
+test('相同设置判定为等价（挂载时应跳过写入）', () => {
+  const a = { enabled: true, volume: 1, rate: 1.05 };
+  assertEqual(isSameSettings(a, { ...a }), true, '同值对象应等价');
+});
+
+test('任一字段变化都判定为不等价（需要写入）', () => {
+  const base = { enabled: true, volume: 1, rate: 1.05 };
+  assertEqual(isSameSettings(base, { ...base, enabled: false }), false, 'enabled 变化');
+  assertEqual(isSameSettings(base, { ...base, volume: 0.5 }), false, 'volume 变化');
+  assertEqual(isSameSettings(base, { ...base, rate: 1.5 }), false, 'rate 变化');
+});
+
+test('浮点音量差异也能识别', () => {
+  assertEqual(
+    isSameSettings({ enabled: true, volume: 0.7, rate: 1 }, { enabled: true, volume: 0.69, rate: 1 }),
+    false,
+    '0.7 与 0.69 不应等价',
+  );
+});
+
 /* ================================================================== */
 /* T3 扩展性验证                                                       */
 /* ================================================================== */
@@ -662,7 +800,6 @@ test('所有内置动作配置结构完整（invariant 校验）', () => {
 /* ------------------------------------------------------------------ */
 /* 输出结果                                                            */
 /* ------------------------------------------------------------------ */
-
 const passed = results.filter((r) => r.pass).length;
 const failed = results.filter((r) => !r.pass).length;
 

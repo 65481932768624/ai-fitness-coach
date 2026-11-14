@@ -114,7 +114,8 @@ export class PoseEngine {
     this.feedback.reset();
 
     this.ruleEngine = new RuleEngine(config, this.gate);
-    this.scoring = new ScoringEngine(config.scoring);
+    // 传入 rules 启用权重扣分：越重要的规则错了扣得越多
+    this.scoring = new ScoringEngine(config.scoring, config.rules);
     this.repCounter = config.mode === 'reps' && config.repCounter
       ? new RepCounter(config.repCounter, this.gate)
       : null;

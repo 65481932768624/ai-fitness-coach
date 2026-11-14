@@ -89,12 +89,19 @@ export interface HoldConfig {
 export interface ScoringConfig {
   /** 基础分，默认 100 */
   baseScore: number;
-  /** severity==='error' 的扣分，默认 12 */
+  /** severity==='error' 的扣分，默认 12（仅固定扣分模式使用） */
   errorPenalty: number;
-  /** severity==='warn' 的扣分，默认 6 */
+  /** severity==='warn' 的扣分，默认 6（仅固定扣分模式使用） */
   warnPenalty: number;
   /** 分数下限，默认 0 */
   minScore: number;
+  /**
+   * 加权模式下 error 的严重度系数，默认 0.5。
+   * 单条 error 最多扣 (该规则权重/总权重) × baseScore × 此系数。
+   */
+  errorSeverityScale?: number;
+  /** 加权模式下 warn 的严重度系数，默认 0.25 */
+  warnSeverityScale?: number;
 }
 
 /** 🔓 一个动作的完整配置 —— 新增动作只需提供此对象 */

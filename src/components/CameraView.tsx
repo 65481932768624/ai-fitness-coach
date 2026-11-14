@@ -18,6 +18,14 @@ export interface CameraViewProps {
   renderWidth?: number;
   /** 画布渲染分辨率高（px），默认 720 */
   renderHeight?: number;
+  /**
+   * 画面是否水平镜像。
+   *
+   * 前置摄像头镜像更符合「照镜子」，后置摄像头必须不镜像，
+   * 否则用户看到的左右与实际相反。视频与骨架 canvas 必须用同一个值，
+   * 否则骨架会跟画面错位。
+   */
+  mirrored?: boolean;
   /** 叠加层内容（HUD / 状态提示） */
   overlay?: React.ReactNode;
 }
@@ -27,8 +35,11 @@ export function CameraView({
   canvasRef,
   renderWidth = 1280,
   renderHeight = 720,
+  mirrored = true,
   overlay,
 }: CameraViewProps): JSX.Element {
+  const flip = mirrored ? 'scaleX(-1)' : undefined;
+
   return (
     <div className="relative">
       {/* 边缘辉光 */}
@@ -38,12 +49,12 @@ export function CameraView({
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
-          style={{ transform: 'scaleX(-1)' }}
+          style={{ transform: flip }}
           playsInline
           muted
           autoPlay
         />
-        <div style={{ transform: 'scaleX(-1)' }} className="absolute inset-0">
+        <div style={{ transform: flip }} className="absolute inset-0">
           <SkeletonCanvas canvasRef={canvasRef} width={renderWidth} height={renderHeight} />
         </div>
 

@@ -4,7 +4,7 @@
  * 偏好持久化到 localStorage，训练开始时由 LiveTrainingPage 应用到引擎。
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { STORAGE_SPEECH_KEY } from '../constants/config';
 import { FeedbackManager } from '../engine';
 import { readJSON, writeJSON } from '../utils/storage';
@@ -23,6 +23,17 @@ const DEFAULT_SETTINGS: SpeechSettings = {
   volume: 1,
   rate: 1.05,
 };
+
+/**
+ * 两份设置是否等价。
+ *
+ * 用来跳过「挂载即写」：初始值本来就是从 localStorage 读出来的，
+ * 再写回去没有任何信息增量，但在隐私模式或配额写满时会让
+ * StorageNotice 在用户还没做任何操作时就弹出来。
+ */
+export function isSameSettings(a: SpeechSettings, b: SpeechSettings): boolean {
+  return a.enabled === b.enabled && a.volume === b.volume && a.rate === b.rate;
+}
 
 export interface UseSpeechResult {
   /** 浏览器是否支持语音合成 */
@@ -45,9 +56,18 @@ export function useSpeech(): UseSpeechResult {
     readJSON<SpeechSettings>(STORAGE_SPEECH_KEY, DEFAULT_SETTINGS),
   );
 
-  // 持久化
+  // 上一次真正落盘的值。首次渲染时与当前值相同，因此不会触发写入。
+  const persistedRef = useRef<SpeechSettings>(settings);
+
+  // 仅在用户改动过设置后写回，避免挂载时就写一次
   useEffect(() => {
-    writeJSON(STORAGE_SPEECH_KEY, settings);
+    if (isSameSettings(persistedRef.current, settings)) {
+      return;
+    }
+    if (writeJSON(STORAGE_SPEECH_KEY, settings)) {
+      persistedRef.current = settings;
+    }
+    // 写入失败时不更新 persistedRef，下次改动会重试；提示条由 StorageNotice 负责
   }, [settings]);
 
   const toggleEnabled = useCallback((): void => {

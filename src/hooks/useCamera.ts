@@ -5,6 +5,11 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  isMirroredFacing,
+  resolveFacing,
+  type CameraFacing,
+} from '../utils/cameraFacing';
 
 /** 摄像头错误态 */
 export interface CameraError {
@@ -27,6 +32,10 @@ export interface UseCameraResult {
   devices: MediaDeviceInfo[];
   /** 当前使用的设备 id */
   deviceId: string | null;
+  /** 当前摄像头朝向 */
+  facing: CameraFacing;
+  /** 画面是否需要水平镜像（后置摄像头为 false） */
+  mirrored: boolean;
   /** 主动开启摄像头 */
   start: () => Promise<void>;
   /** 切换到指定设备并重启 */
@@ -119,6 +128,7 @@ export function useCamera(): UseCameraResult {
   const [error, setError] = useState<CameraError | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [facing, setFacing] = useState<CameraFacing>('unknown');
 
   /** 刷新设备列表（需已有权限才能拿到 label） */
   const refreshDevices = useCallback(async (): Promise<MediaDeviceInfo[]> => {
@@ -161,12 +171,13 @@ export function useCamera(): UseCameraResult {
         const stream = await acquireStream(targetId);
         streamRef.current = stream;
 
-        // 记录实际生效的设备
+        // 记录实际生效的设备与朝向
         const track = stream.getVideoTracks()[0];
         const settings = track?.getSettings?.();
         if (settings?.deviceId) {
           setDeviceId(settings.deviceId);
         }
+        setFacing(resolveFacing(settings?.facingMode, track?.label));
 
         const video = videoRef.current;
         if (video) {
@@ -219,5 +230,17 @@ export function useCamera(): UseCameraResult {
     };
   }, [stop]);
 
-  return { videoRef, ready, loading, error, devices, deviceId, start: () => start(), selectDevice, stop };
+  return {
+    videoRef,
+    ready,
+    loading,
+    error,
+    devices,
+    deviceId,
+    facing,
+    mirrored: isMirroredFacing(facing),
+    start: () => start(),
+    selectDevice,
+    stop,
+  };
 }

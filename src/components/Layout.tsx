@@ -9,6 +9,7 @@
 import { Activity, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { StorageNotice } from './StorageNotice';
 
 export interface LayoutProps {
   /** 内容 */
@@ -76,6 +77,9 @@ export function Layout({ children, overlayHeader = false }: LayoutProps): JSX.El
           </div>
         </div>
       </header>
+
+      {/* 存储失败提示：粘在顶栏下方，不占用内容流 */}
+      <StorageNotice />
 
       <main
         className={`mx-auto w-full max-w-[1180px] flex-1 px-4 pb-20 sm:px-8 ${

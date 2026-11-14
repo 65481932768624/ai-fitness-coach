@@ -221,6 +221,7 @@ export function LiveTrainingPage(): JSX.Element {
           <CameraView
             videoRef={videoRef}
             canvasRef={canvasRef}
+            mirrored={camera.mirrored}
             overlay={
               <>
                 <TrainingHUD
