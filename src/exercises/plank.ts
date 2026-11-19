@@ -7,6 +7,7 @@
 
 import { LM } from '../constants/landmarks';
 import type { ExerciseConfig } from '../types/exercise';
+import { plankGuidance } from './flagship-guidance';
 
 export const plankConfig: ExerciseConfig = {
   id: 'plank',
@@ -18,6 +19,8 @@ export const plankConfig: ExerciseConfig = {
   icon: 'plank',
   description: '强化核心稳定，塑造腹部线条。',
   tips: ['侧面拍摄', '肘在肩正下方', '收紧核心'],
+
+  guidance: plankGuidance,
 
   mode: 'hold',
 

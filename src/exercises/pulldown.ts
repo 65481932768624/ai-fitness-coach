@@ -13,6 +13,7 @@
 
 import { TRIPLES } from '../constants/landmarks';
 import type { ExerciseConfig } from '../types/exercise';
+import { pulldownGuidance } from './flagship-guidance';
 
 export const pulldownConfig: ExerciseConfig = {
   id: 'pulldown',
@@ -24,6 +25,8 @@ export const pulldownConfig: ExerciseConfig = {
   icon: 'pulldown',
   description: '拉起背阔肌的宽度，练出倒三角。',
   tips: ['正对镜头，坐姿全身入镜', '双手宽于肩，正握横杆', '拉到锁骨上方，别拉到颈后', '下放放慢，别用惯性'],
+
+  guidance: pulldownGuidance,
 
   mode: 'reps',
 

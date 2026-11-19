@@ -7,6 +7,7 @@
 
 import { LM, TRIPLES } from '../constants/landmarks';
 import type { ExerciseConfig } from '../types/exercise';
+import { squatGuidance } from './flagship-guidance';
 
 export const squatConfig: ExerciseConfig = {
   id: 'squat',
@@ -18,6 +19,8 @@ export const squatConfig: ExerciseConfig = {
   icon: 'squat',
   description: '锻炼大腿与臀部，强化下肢力量。',
   tips: ['侧面 45° 拍摄', '全身入镜', '双脚与肩同宽'],
+
+  guidance: squatGuidance,
 
   mode: 'reps',
 

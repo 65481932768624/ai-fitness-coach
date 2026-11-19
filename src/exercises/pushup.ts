@@ -7,6 +7,7 @@
 
 import { LM, TRIPLES } from '../constants/landmarks';
 import type { ExerciseConfig } from '../types/exercise';
+import { pushupGuidance } from './flagship-guidance';
 
 export const pushupConfig: ExerciseConfig = {
   id: 'pushup',
@@ -18,6 +19,8 @@ export const pushupConfig: ExerciseConfig = {
   icon: 'pushup',
   description: '锻炼胸肌、肩部与三头肌。',
   tips: ['侧面拍摄', '身体成一条直线', '手腕在肩正下方'],
+
+  guidance: pushupGuidance,
 
   mode: 'reps',
 

@@ -72,6 +72,67 @@ const PATHS: Record<string, JSX.Element> = {
       <path d="M3 19.4h18" strokeDasharray="1.5 2.4" opacity="0.4" />
     </>
   ),
+  // ---- 家族图标（库动作共用）----
+  press: (
+    <>
+      <path d="M4 7h16" />
+      <circle cx="12" cy="11" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M12 12.7v4.6" />
+      <path d="M12 17.3 8.8 20" />
+      <path d="m12 17.3 3.2 2.7" />
+    </>
+  ),
+  fly: (
+    <>
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M10.5 10.8 5.4 7.2" />
+      <path d="M13.5 10.8 18.6 7.2" />
+      <path d="M5.4 7.2c-1.8 2.4-1.8 5.6 0 8" />
+      <path d="M18.6 7.2c1.8 2.4 1.8 5.6 0 8" />
+    </>
+  ),
+  dip: (
+    <>
+      <path d="M4.4 6.2v13.6" />
+      <path d="M19.6 6.2v13.6" />
+      <path d="M4.4 6.2h4" />
+      <path d="M19.6 6.2h-4" />
+      <circle cx="12" cy="8.4" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M12 10.4 8.9 14.8" />
+      <path d="m12 10.4 3.1 4.4" />
+    </>
+  ),
+  row: (
+    <>
+      <path d="M3 5.5h18" />
+      <path d="M7.5 5.5v9.5" />
+      <path d="M16.5 5.5v9.5" />
+      <circle cx="12" cy="11.5" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M12 13 10.8 17.6" />
+      <path d="m12 13 1.2 4.6" />
+    </>
+  ),
+  'straight-arm': (
+    <>
+      <path d="M3 4.6h18" />
+      <path d="M12 4.6v3" />
+      <path d="M12 7.6 7 12.6" />
+      <path d="M12 7.6 17 12.6" />
+      <path d="M7 12.6 5 19" />
+      <path d="M17 12.6 19 19" />
+    </>
+  ),
+  deadlift: (
+    <>
+      <path d="M4 9h16" />
+      <circle cx="4" cy="10.8" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="20" cy="10.8" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M12 9v4" />
+      <circle cx="12" cy="6.6" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M12 13 9.4 18.6" />
+      <path d="m12 13 2.6 5.6" />
+    </>
+  ),
 };
 
 /** 兜底图标（未注册的动作） */

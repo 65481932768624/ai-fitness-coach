@@ -7,8 +7,58 @@
 
 import type { LandmarkIndex } from './pose';
 
-/** 支持的动作用户端 ID */
-export type ExerciseId = 'squat' | 'pushup' | 'plank' | 'pulldown' | 'benchpress';
+/** 支持的动作 ID 由注册表推导，新增动作无需再改这里的联合类型 */
+export type ExerciseId = string;
+
+/** 动作来源录屏，便于回溯配置依据 */
+export interface ExerciseSource {
+  /** 文件名 */
+  video: string;
+  /** 原始编号 */
+  number: number;
+}
+
+/** 动作教学资料（来自手册；不是实时判定规则） */
+export interface ExerciseGuidance {
+  /** 目标肌群 */
+  muscles: string;
+  /** 所需器材 */
+  equipment: string;
+  /** 起始位 / 发力 / 顶点 / 返回 / 呼吸 */
+  steps: Array<{ title: string; detail: string }>;
+  /** 关键要点 */
+  keyPoints: string[];
+  /** 常见错误 */
+  mistakes: string[];
+  /** 器材摆放、座椅、把手、握距等准备提示 */
+  setupCues: string[];
+  /** 沉肩、挺胸、核心、呼吸等周期性要领提示 */
+  coachingCues: string[];
+  /** 来源录屏 */
+  source: ExerciseSource;
+}
+
+/** 配置驱动计数器关节点选择 */
+export type CounterSide = 'left' | 'right' | 'alternate';
+
+/** 肘屈伸动作的阶段角度（度），完整行程由配置给出 */
+export interface ExerciseMotionProfile {
+  /** 主计数阶段；一般肘角较大 */
+  primary: [number, number];
+  /** 过渡阶段 */
+  middle: [number, number];
+  /** 完成一次必须经过的阶段；一般肘角较小 */
+  target: [number, number];
+  /** 阶段显示名 */
+  labels?: [string, string, string];
+  /** 计数使用哪一侧 */
+  side?: CounterSide;
+  /** 最短计数间隔 */
+  minRepIntervalMs?: number;
+}
+
+/** 器械/推/拉/夹等动作族的共享初始配置 */
+export type ExerciseFamily = 'press' | 'fly' | 'pushup' | 'dip' | 'pulldown' | 'row' | 'straight-arm' | 'deadlift';
 
 /** 三点组合：以 b 为顶点计算 a-b-c 夹角 */
 export interface JointTriple {
@@ -124,14 +174,20 @@ export interface ExerciseConfig {
   description: string;
   /** 开始前注意事项 */
   tips: string[];
+  /** 完整教学与语音提示资料 */
+  guidance?: ExerciseGuidance;
+  /** 动作族，便于复用演示与判定模板 */
+  family?: ExerciseFamily;
+  /** 肘屈伸计数的角度模板；省略时使用 repCounter */
+  motion?: ExerciseMotionProfile;
 
   /** 计数模式：reps = 计次动作；hold = 静态保持动作 */
   mode: 'reps' | 'hold';
 
   /** 关节规则列表 */
   rules: JointRule[];
-  /** 计数状态机配置（hold 类为 null） */
-  repCounter: RepCounterConfig | null;
+  /** 计数状态机配置（hold 类为 null；使用 motion 时可自动生成） */
+  repCounter?: RepCounterConfig | null;
   /** 静态动作配置（hold 类必填） */
   hold?: HoldConfig;
   /** 评分配置 */

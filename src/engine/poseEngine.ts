@@ -22,6 +22,7 @@ import type {
 import { generateId } from '../utils/format';
 import { setVideoAspectRatio } from './angleCalculator';
 import { CanvasRenderer } from './canvasRenderer';
+import { CoachingManager } from './coachingManager';
 import { ConfidenceGate } from './confidenceGate';
 import { FeedbackManager } from './feedbackManager';
 import { PoseDetector } from './poseDetector';
@@ -41,6 +42,7 @@ export class PoseEngine {
   private repCounter: RepCounter | null = null;
   private scoring: ScoringEngine | null = null;
   private feedback: FeedbackManager;
+  private coaching: CoachingManager;
   private renderer: CanvasRenderer;
 
   private config: ExerciseConfig | null = null;
@@ -63,6 +65,7 @@ export class PoseEngine {
   private lastHoldSampleMs = 0;
   private lastSnapshot: FrameSnapshot = PoseEngine.emptySnapshot();
   private stoppedSummary: SessionSummary | null = null;
+  private lastErrorFeedbackAtMs = -Infinity;
 
   // 暂停累计：暂停时间不计入训练时长（否则挂机 10 分钟会污染记录）
   private pausedTotalMs = 0;
@@ -73,6 +76,7 @@ export class PoseEngine {
     this.smoother = new LandmarkSmoother();
     this.gate = new ConfidenceGate();
     this.feedback = new FeedbackManager();
+    this.coaching = new CoachingManager();
     this.renderer = new CanvasRenderer();
   }
 
@@ -134,8 +138,10 @@ export class PoseEngine {
     this.holdElapsedMs = 0;
     this.lastHoldSampleMs = 0;
     this.stoppedSummary = null;
+    this.lastErrorFeedbackAtMs = -Infinity;
     this.lastSnapshot = PoseEngine.emptySnapshot();
     this.repCounter?.reset();
+    this.coaching.reset();
   }
 
   /**
@@ -165,13 +171,14 @@ export class PoseEngine {
     this.startedAtIso = new Date().toISOString();
     this.status = 'running';
 
-    // 入场提示
+    // 入场先讲最重要的准备信息，之后定期轮换动作要领
     if (this.config) {
-      const intro =
-        this.config.mode === 'hold'
-          ? `${this.config.name}开始，坚持住`
-          : `开始${this.config.name}，注意姿势`;
-      this.feedback.forceSpeak(intro, this.startedAtMs);
+      const setup = this.config.guidance?.setupCues[0];
+      const intro = this.config.mode === 'hold'
+        ? `${this.config.name}开始，坚持住`
+        : `开始${this.config.name}`;
+      this.feedback.forceSpeak(setup ? `${intro}。${setup}` : intro, this.startedAtMs);
+      this.coaching.start(this.startedAtMs);
     }
 
     this.loop();
@@ -189,6 +196,7 @@ export class PoseEngine {
       this.rafId = 0;
     }
     this.feedback.speak('已暂停', performance.now());
+    this.coaching.pause();
   }
 
   /** 恢复主循环 */
@@ -203,6 +211,7 @@ export class PoseEngine {
       this.pausedAtMs = 0;
     }
     this.feedback.speak('继续加油', performance.now());
+    this.coaching.resume(performance.now());
     this.loop();
   }
 
@@ -343,6 +352,11 @@ export class PoseEngine {
 
     // 语音反馈
     const spoken = this.feedback.submit(violations, now);
+    if (violations.length > 0) {
+      this.lastErrorFeedbackAtMs = now;
+    }
+    const coached = this.deliverCoaching(spoken, now);
+    const feedbackText = spoken ?? coached;
 
     // 绘制
     this.renderer.render(landmarks, violations, this.config);
@@ -352,7 +366,7 @@ export class PoseEngine {
       phase: state.phaseLabel,
       repCount: state.repCount,
       currentScore,
-      lastFeedback: spoken ?? this.lastSnapshot.lastFeedback,
+      lastFeedback: feedbackText ?? this.lastSnapshot.lastFeedback,
       violations,
     });
   }
@@ -380,6 +394,11 @@ export class PoseEngine {
     }
 
     const spoken = this.feedback.submit(violations, now);
+    if (violations.length > 0) {
+      this.lastErrorFeedbackAtMs = now;
+    }
+    const coached = this.deliverCoaching(spoken, now);
+    const feedbackText = spoken ?? coached;
     this.renderer.render(landmarks, violations, this.config);
 
     this.emitSnapshot({
@@ -389,9 +408,26 @@ export class PoseEngine {
       currentScore: this.scoring ? this.scoring.scoreHold(passRate) : 0,
       holdElapsedMs: this.holdElapsedMs,
       passRate,
-      lastFeedback: spoken ?? this.lastSnapshot.lastFeedback,
+      lastFeedback: feedbackText ?? this.lastSnapshot.lastFeedback,
       violations,
     });
+  }
+
+  /**
+   * 投递一条周期性动作要领（沉肩/挺胸/呼吸等）。
+   * 只有本帧没有纠错播报时才讲，避免抢话；播报走同一个
+   * FeedbackManager，共享开关、音量与去重。
+   */
+  private deliverCoaching(errorSpoken: string | null, now: number): string | null {
+    const cues = this.config?.guidance?.coachingCues ?? [];
+    if (cues.length === 0 || errorSpoken) {
+      return null;
+    }
+    const tick = this.coaching.tick(now, cues, this.lastErrorFeedbackAtMs);
+    if (!tick) {
+      return null;
+    }
+    return this.feedback.speak(tick.text, now) ? tick.text : null;
   }
 
   /** 计算 hold 模式达标率 */

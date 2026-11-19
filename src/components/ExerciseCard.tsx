@@ -51,7 +51,7 @@ export function ExerciseCard({ exercise, onSelect }: ExerciseCardProps): JSX.Ele
         <span
           className={`flex h-[46px] w-[46px] items-center justify-center rounded-[14px] ${tone.bg} ${tone.text}`}
         >
-          <ExerciseGlyph id={exercise.id} size={26} />
+          <ExerciseGlyph id={exercise.family ?? exercise.id} size={26} />
         </span>
 
         {disabled ? (

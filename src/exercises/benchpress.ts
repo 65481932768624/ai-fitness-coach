@@ -12,6 +12,7 @@
 
 import { LM, TRIPLES } from '../constants/landmarks';
 import type { ExerciseConfig } from '../types/exercise';
+import { benchpressGuidance } from './flagship-guidance';
 
 export const benchPressConfig: ExerciseConfig = {
   id: 'benchpress',
@@ -33,6 +34,8 @@ export const benchPressConfig: ExerciseConfig = {
     '下放吸气、推起吐气；大重量上推憋气、顶端再吐',
     '别给杠铃套固定卡钳，推不起来能往一边倒卸片',
   ],
+
+  guidance: benchpressGuidance,
 
   mode: 'reps',
 

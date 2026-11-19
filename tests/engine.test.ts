@@ -705,20 +705,43 @@ test('浮点音量差异也能识别', () => {
 
 suite('T3 扩展性验证');
 
-test('注册表包含 5 个动作且 id 一致', () => {
-  const ids = Object.keys(EXERCISE_REGISTRY).sort();
-  assertEqual(ids.join(','), 'benchpress,plank,pulldown,pushup,squat', '注册表应含 squat/pushup/plank/pulldown');
-  assertEqual(EXERCISE_LIST.length, 5, '动作列表应有 5 项');
+test('注册表含手写 5 动作 + 71 库动作', () => {
+  const ids = Object.keys(EXERCISE_REGISTRY);
+  // 手写旗舰动作全部在位
+  for (const core of ['squat', 'pushup', 'plank', 'pulldown', 'benchpress']) {
+    assertEqual(ids.includes(core), true, `注册表应含 ${core}`);
+  }
+  // 总数 = 5 手写 + 71 库（去掉 deadlift 标记不可用仍在注册表）− 与 benchpress-v7 重复项
+  assertEqual(EXERCISE_LIST.length >= 70, true, `动作列表应有 70+ 项，实际 ${EXERCISE_LIST.length}`);
+});
+
+test('库动作与手写动作不重复注册', () => {
+  const ids = Object.keys(EXERCISE_REGISTRY);
+  const unique = new Set(ids);
+  assertEqual(unique.size, ids.length, 'id 不应重复');
+});
+
+test('库动作都有教学资料（guidance）与规则', () => {
+  const lib = EXERCISE_LIST.filter((e) => e.guidance);
+  assertEqual(lib.length >= 70, true, `带 guidance 的动作应 ≥70，实际 ${lib.length}`);
+  for (const e of lib.slice(0, 8)) {
+    assertEqual(e.guidance.coachingCues.length > 0, true, `${e.name} 应有周期要领`);
+    assertEqual(e.guidance.setupCues.length > 0, true, `${e.name} 应有器材准备提示`);
+    assertEqual(e.rules.length > 0, true, `${e.name} 应有判定规则`);
+    assertEqual(!!e.repCounter || e.mode === 'hold', true, `${e.name} 应有计数配置`);
+  }
 });
 
 test('getExercise 按 id 返回配置，未知 id 返回 null', () => {
   assertEqual(getExercise('squat')?.id, 'squat', '应返回深蹲配置');
+  assertEqual(getExercise('pec-deck')?.name, '蝴蝶机夹胸', '库动作按 id 可取');
   assertEqual(getExercise('unknown'), null, '未知 id 应返回 null');
 });
 
 test('isExerciseId 类型守卫正确', () => {
   assertEqual(isExerciseId('plank'), true, 'plank 是合法 id');
-  assertEqual(isExerciseId('deadlift'), false, 'deadlift 非合法 id');
+  assertEqual(isExerciseId('deadlift'), true, 'deadlift 现为库内动作（暂不可用但仍注册）');
+  assertEqual(isExerciseId('not-a-move'), false, '未注册 id 返回 false');
 });
 
 test('模拟新增动作：仅靠配置即可被注册表识别（不改引擎代码）', () => {
