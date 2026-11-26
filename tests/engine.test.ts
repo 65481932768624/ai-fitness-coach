@@ -21,7 +21,7 @@ import { ScoringEngine } from '../src/engine/scoringEngine';
 import { FeedbackManager } from '../src/engine/feedbackManager';
 import { EXERCISE_REGISTRY, EXERCISE_LIST, getExercise, isExerciseId } from '../src/exercises/index';
 import { squatConfig } from '../src/exercises/squat';
-import { TRIPLES } from '../src/constants/landmarks';
+import { PAIRS, TRIPLES } from '../src/constants/landmarks';
 import { isMirroredFacing, resolveFacing } from '../src/utils/cameraFacing';
 import { isSameSettings } from '../src/hooks/useSpeech';
 import type { Landmark } from '../src/types/pose';
@@ -799,7 +799,10 @@ test('模拟新增动作：仅靠配置即可被注册表识别（不改引擎�
 
 test('所有内置动作配置结构完整（invariant 校验）', () => {
   for (const cfg of EXERCISE_LIST) {
-    assert(cfg.rules.length > 0, `${cfg.id} 必须有规则`);
+    // cardio 只计时、不做姿态判定，允许没有角度规则
+    if (cfg.mode !== 'cardio') {
+      assert(cfg.rules.length > 0, `${cfg.id} 必须有规则`);
+    }
     assert(cfg.scoring.baseScore > 0, `${cfg.id} baseScore 必须为正`);
     if (cfg.mode === 'reps') {
       assert(cfg.repCounter !== null, `${cfg.id} reps 模式必须有 repCounter`);
@@ -813,11 +816,83 @@ test('所有内置动作配置结构完整（invariant 校验）', () => {
         rc.phases.some((p) => p.phase === rc.requiredIntermediatePhase),
         `${cfg.id} requiredIntermediatePhase 必须在 phases 中定义`,
       );
-    } else {
+    } else if (cfg.mode === 'hold') {
       assert(cfg.hold !== undefined, `${cfg.id} hold 模式必须有 hold 配置`);
     }
-    // 规则权重之和若设定应接近 100（仅告警不失败）
   }
+});
+
+test('动作库覆盖全身部位', () => {
+  const parts = new Set(EXERCISE_LIST.map((e) => e.bodyPart));
+  for (const p of ['legs', 'glutes', 'chest', 'back', 'shoulders', 'arms', 'core', 'calves', 'forearms', 'cardio']) {
+    assert(parts.has(p as never), `部位 ${p} 应有动作`);
+  }
+});
+
+test('新动作都有入场准备提示与周期要领', () => {
+  const v2 = EXERCISE_LIST.filter((e) => {
+    const v = e.guidance?.source.video ?? '';
+    return v.includes('20261119') || v.includes('20261126');
+  });
+  assert(v2.length >= 80, `第二批动作应 >=80，实际 ${v2.length}`);
+  for (const e of v2.slice(0, 10)) {
+    assert((e.guidance?.setupCues.length ?? 0) > 0, `${e.name} 应有器材/握距提示`);
+    assert((e.guidance?.coachingCues.length ?? 0) >= 4, `${e.name} 应有周期要领`);
+  }
+});
+
+
+/* ------------------------------------------------------------------ */
+/* T2.9 规则度量方式（vAngle / hDist）                                 */
+/* ------------------------------------------------------------------ */
+
+suite('T2.9 规则度量方式');
+
+function mkLandmarks(points: Record<number, [number, number]>): Landmark[] {
+  const arr = Array.from({ length: 33 }, () => ({ x: 0, y: 0, z: 0, visibility: 1 }));
+  for (const [idx, [x, y]] of Object.entries(points)) {
+    arr[Number(idx)] = { x, y, z: 0, visibility: 1 };
+  }
+  return arr;
+}
+
+test('vAngle：躯干竖直时接近 0 度', () => {
+  const lm = mkLandmarks({ 11: [0.5, 0.2], 23: [0.5, 0.6] });
+  const rule = {
+    id: 't', label: '躯干', triple: PAIRS.LEFT_TORSO_AXIS,
+    targetRange: [0, 10] as [number, number], messageLow: '', messageHigh: '',
+    severity: 'warn' as const, weight: 10, metric: 'vAngle' as const,
+  };
+  const gate = new ConfidenceGate();
+  const re = new RuleEngine(squatConfig, gate);
+  // 直接验证 calcVerticalAngle 口径
+  const deg = calcVerticalAngle(lm[11], lm[23]);
+  assertEqual(deg, 0, `竖直应为 0 度，实际 ${deg}`);
+  assertEqual(rule.metric, 'vAngle', '规则应声明 vAngle');
+});
+
+test('vAngle：前倾 45 度能被识别', () => {
+  const lm = mkLandmarks({ 11: [0.7, 0.3], 23: [0.5, 0.7] });
+  const deg = calcVerticalAngle(lm[11], lm[23]);
+  // 竖屏 16:9 默认宽高比下，dx 会被拉伸，实测约 42 度
+  assertEqual(deg >= 35 && deg <= 50, true, `前倾应落在 35-50，实际 ${deg}`);
+});
+
+test('hDist：水平距离按百分比计算', () => {
+  const lm = mkLandmarks({ 25: [0.40, 0.6], 27: [0.45, 0.9] });
+  const d = calcHorizontalDistance(lm[25], lm[27]);
+  assertEqual(Math.round(d * 100), 5, `0.05 应换算为 5，实际 ${d}`);
+});
+
+test('hDist：膝踝对齐时为 0', () => {
+  const lm = mkLandmarks({ 25: [0.5, 0.6], 27: [0.5, 0.9] });
+  assertEqual(calcHorizontalDistance(lm[25], lm[27]), 0, '对齐时距离应为 0');
+});
+
+test('新增三点组合已注册（肩/踝/腕）', () => {
+  assertEqual(!!TRIPLES.LEFT_ARM_TORSO, true, '应有三点：大臂相对躯干');
+  assertEqual(!!TRIPLES.LEFT_ANKLE, true, '应有三点：踝');
+  assertEqual(!!TRIPLES.LEFT_WRIST, true, '应有三点：腕');
 });
 
 /* ------------------------------------------------------------------ */

@@ -55,7 +55,30 @@ export const TRIPLES: Record<string, JointTriple> = {
   RIGHT_TORSO: { a: LM.RIGHT_SHOULDER, b: LM.RIGHT_HIP, c: LM.RIGHT_KNEE },
   LEFT_BODY_LINE: { a: LM.LEFT_SHOULDER, b: LM.LEFT_HIP, c: LM.LEFT_ANKLE },
   RIGHT_BODY_LINE: { a: LM.RIGHT_SHOULDER, b: LM.RIGHT_HIP, c: LM.RIGHT_ANKLE },
+
+  // ---- v8 新增：肩、踝、腕 ----
+  /** 大臂相对躯干（侧平举、前平举、推举用） */
+  LEFT_ARM_TORSO: { a: LM.LEFT_HIP, b: LM.LEFT_SHOULDER, c: LM.LEFT_ELBOW },
+  RIGHT_ARM_TORSO: { a: LM.RIGHT_HIP, b: LM.RIGHT_SHOULDER, c: LM.RIGHT_ELBOW },
+  /** 踝关节（提踵用）：膝-踝-脚趾 */
+  LEFT_ANKLE: { a: LM.LEFT_KNEE, b: LM.LEFT_ANKLE, c: LM.LEFT_FOOT_INDEX },
+  RIGHT_ANKLE: { a: LM.RIGHT_KNEE, b: LM.RIGHT_ANKLE, c: LM.RIGHT_FOOT_INDEX },
+  /** 腕关节（手腕弯举用）：肘-腕-食指 */
+  LEFT_WRIST: { a: LM.LEFT_ELBOW, b: LM.LEFT_WRIST, c: LM.LEFT_INDEX },
+  RIGHT_WRIST: { a: LM.RIGHT_ELBOW, b: LM.RIGHT_WRIST, c: LM.RIGHT_INDEX },
 };
+
+/** 两点度量组合（metric 为 vAngle / hDist 时使用 a、b 两点） */
+export const PAIRS = {
+  /** 躯干相对竖直方向：肩-髋 */
+  LEFT_TORSO_AXIS: { a: LM.LEFT_SHOULDER, b: LM.LEFT_HIP },
+  RIGHT_TORSO_AXIS: { a: LM.RIGHT_SHOULDER, b: LM.RIGHT_HIP },
+  /** 膝踝水平对齐（膝内扣） */
+  LEFT_KNEE_ALIGN: { a: LM.LEFT_KNEE, b: LM.LEFT_ANKLE },
+  RIGHT_KNEE_ALIGN: { a: LM.RIGHT_KNEE, b: LM.RIGHT_ANKLE },
+  /** 双膝水平间距（髋外展/内收） */
+  KNEES_GAP: { a: LM.LEFT_KNEE, b: LM.RIGHT_KNEE },
+} as const;
 
 /** 骨架连线（用于 Canvas 绘制），成对的关键点索引 */
 export const SKELETON_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [

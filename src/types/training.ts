@@ -63,7 +63,7 @@ export interface SessionSummary {
   /** 总时长（ms） */
   durationMs: number;
   /** 模式 */
-  mode: 'reps' | 'hold';
+  mode: 'reps' | 'hold' | 'cardio';
   /** reps 模式：总次数 */
   totalReps: number;
   /** reps 模式：达标次数 */

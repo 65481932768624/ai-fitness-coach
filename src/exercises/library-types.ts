@@ -6,6 +6,7 @@
  */
 
 import type {
+  BodyPart,
   ExerciseFamily,
   ExerciseMotionProfile,
   HoldConfig,
@@ -19,7 +20,7 @@ export interface LibraryEntry {
   id: string;
   name: string;
   nameEn: string;
-  bodyPart: 'legs' | 'chest' | 'core' | 'back';
+  bodyPart: BodyPart;
   difficulty: 1 | 2 | 3;
   supported: boolean;
   family: ExerciseFamily;
@@ -34,9 +35,9 @@ export interface LibraryEntry {
   coachingCues: string[];
   sourceVideo: string;
   sourceNumber: number;
-  mode: 'reps' | 'hold';
+  mode: 'reps' | 'hold' | 'cardio';
   rules: JointRule[];
-  repCounter?: RepCounterConfig;
+  repCounter?: RepCounterConfig | null;
   hold?: HoldConfig;
   scoring?: ScoringConfig;
   motion?: ExerciseMotionProfile;

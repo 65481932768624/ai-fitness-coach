@@ -38,6 +38,28 @@ export interface ExerciseGuidance {
   source: ExerciseSource;
 }
 
+/** 目标部位（v8 起覆盖全身） */
+export type BodyPart =
+  | 'legs'
+  | 'glutes'
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'arms'
+  | 'core'
+  | 'calves'
+  | 'forearms'
+  | 'cardio';
+
+/** 规则度量方式 */
+export type RuleMetric =
+  /** 三点夹角（默认） */
+  | 'angle'
+  /** 两点连线与竖直方向夹角，用于躯干前倾/后仰 */
+  | 'vAngle'
+  /** 两点水平距离百分比，用于膝内扣、双膝间距 */
+  | 'hDist';
+
 /** 配置驱动计数器关节点选择 */
 export type CounterSide = 'left' | 'right' | 'alternate';
 
@@ -58,7 +80,39 @@ export interface ExerciseMotionProfile {
 }
 
 /** 器械/推/拉/夹等动作族的共享初始配置 */
-export type ExerciseFamily = 'press' | 'fly' | 'pushup' | 'dip' | 'pulldown' | 'row' | 'straight-arm' | 'deadlift';
+export type ExerciseFamily =
+  | 'press'
+  | 'fly'
+  | 'pushup'
+  | 'dip'
+  | 'pulldown'
+  | 'row'
+  | 'straight-arm'
+  | 'deadlift'
+  // v8 新增
+  | 'squat'
+  | 'hinge'
+  | 'lunge'
+  | 'leg-ext'
+  | 'leg-curl'
+  | 'leg-press'
+  | 'abduction'
+  | 'adduction'
+  | 'kickback'
+  | 'bridge'
+  | 'back-ext'
+  | 'shoulder-press'
+  | 'lateral-raise'
+  | 'front-raise'
+  | 'rear-delt'
+  | 'upright-row'
+  | 'curl'
+  | 'pullup-curl'
+  | 'triceps'
+  | 'crunch'
+  | 'calf'
+  | 'wrist'
+  | 'cardio';
 
 /** 三点组合：以 b 为顶点计算 a-b-c 夹角 */
 export interface JointTriple {
@@ -93,6 +147,12 @@ export interface JointRule {
   maxViolationsPerRep?: number;
   /** 评分权重，总和建议 100 */
   weight: number;
+  /**
+   * 度量方式，默认 angle。
+   * vAngle 用 triple 的 a、b 两点算与竖直方向夹角；
+   * hDist 用 triple 的 a、b 两点算水平距离（百分比）。
+   */
+  metric?: RuleMetric;
   /** 仅在这些状态下生效；省略表示所有状态生效 */
   activePhases?: ExercisePhase[];
 }
@@ -163,7 +223,7 @@ export interface ExerciseConfig {
   /** 英文名 */
   nameEn: string;
   /** 目标部位 */
-  bodyPart: 'legs' | 'chest' | 'core' | 'back';
+  bodyPart: BodyPart;
   /** 难度 1-3 */
   difficulty: 1 | 2 | 3;
   /** 是否已支持（false 在选择页显示「即将支持」） */
@@ -181,8 +241,8 @@ export interface ExerciseConfig {
   /** 肘屈伸计数的角度模板；省略时使用 repCounter */
   motion?: ExerciseMotionProfile;
 
-  /** 计数模式：reps = 计次动作；hold = 静态保持动作 */
-  mode: 'reps' | 'hold';
+  /** 计数模式：reps = 计次；hold = 静态保持；cardio = 只计时 */
+  mode: 'reps' | 'hold' | 'cardio';
 
   /** 关节规则列表 */
   rules: JointRule[];

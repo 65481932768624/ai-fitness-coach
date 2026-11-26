@@ -20,15 +20,22 @@ export interface ExerciseCardProps {
 /** 部位中文名 */
 const BODY_PART_LABEL: Record<ExerciseConfig['bodyPart'], string> = {
   legs: '下肢',
-  chest: '上肢 / 胸',
-  core: '核心',
+  glutes: '臀部',
+  chest: '胸',
   back: '背部',
+  shoulders: '肩部',
+  arms: '手臂',
+  core: '核心',
+  calves: '小腿',
+  forearms: '前臂',
+  cardio: '有氧',
 };
 
 /** 模式中文名 */
 const MODE_LABEL: Record<ExerciseConfig['mode'], string> = {
   reps: '计次',
   hold: '静态保持',
+  cardio: '计时',
 };
 
 export function ExerciseCard({ exercise, onSelect }: ExerciseCardProps): JSX.Element {

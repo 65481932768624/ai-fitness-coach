@@ -18,9 +18,15 @@ type Filter = 'all' | ExerciseConfig['bodyPart'];
 const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: 'all', label: '全部' },
   { key: 'legs', label: '下肢' },
-  { key: 'chest', label: '上肢' },
-  { key: 'core', label: '核心' },
+  { key: 'glutes', label: '臀部' },
+  { key: 'chest', label: '胸' },
   { key: 'back', label: '背部' },
+  { key: 'shoulders', label: '肩部' },
+  { key: 'arms', label: '手臂' },
+  { key: 'core', label: '核心' },
+  { key: 'calves', label: '小腿' },
+  { key: 'forearms', label: '前臂' },
+  { key: 'cardio', label: '有氧' },
 ];
 
 export function ActionSelectPage(): JSX.Element {

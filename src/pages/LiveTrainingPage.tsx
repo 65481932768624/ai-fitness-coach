@@ -17,10 +17,18 @@ import { Layout } from '../components/Layout';
 import { StatusBanner, type StatusBannerKind } from '../components/StatusBanner';
 import { TrainingHUD } from '../components/TrainingHUD';
 import { getExercise, isExerciseId } from '../exercises';
+import type { ExerciseConfig } from '../types/exercise';
 import { useCamera } from '../hooks/useCamera';
 import { usePoseEngine } from '../hooks/usePoseEngine';
 import { useSpeech } from '../hooks/useSpeech';
 import { formatDuration, formatPercent } from '../utils/format';
+
+/** 模式中文名 */
+const MODE_TEXT: Record<ExerciseConfig['mode'], string> = {
+  reps: '计次',
+  hold: '静态保持',
+  cardio: '计时',
+};
 
 export function LiveTrainingPage(): JSX.Element {
   const { exerciseId = '' } = useParams<{ exerciseId: string }>();
@@ -168,7 +176,7 @@ export function LiveTrainingPage(): JSX.Element {
     bannerMessage = '请站到画面中央，保持全身入镜';
   }
 
-  const isHold = config.mode === 'hold';
+  const isHold = config.mode !== 'reps';
   const hasError = engine.snapshot.violations.some((v) => v.severity === 'error');
 
   const quickStats = [
@@ -199,7 +207,7 @@ export function LiveTrainingPage(): JSX.Element {
           </button>
           <h1 className="display mt-3 text-[28px] leading-tight sm:text-[34px]">{config.name}</h1>
           <p className="mt-1.5 text-[11.5px] text-ink-400">
-            {config.nameEn} · {isHold ? '静态保持' : '计次'} · 难度 {config.difficulty}/3
+            {config.nameEn} · {MODE_TEXT[config.mode]} · 难度 {config.difficulty}/3
           </p>
         </div>
 

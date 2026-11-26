@@ -305,10 +305,10 @@ export class PoseEngine {
 
     const smoothed = this.smoother.smooth(result.landmarks);
 
-    if (this.config.mode === 'hold') {
-      this.processHoldFrame(smoothed, now);
-    } else {
+    if (this.config.mode === 'reps') {
       this.processRepFrame(smoothed, now);
+    } else {
+      this.processHoldFrame(smoothed, now);
     }
   }
 
@@ -403,7 +403,7 @@ export class PoseEngine {
 
     this.emitSnapshot({
       detected: true,
-      phase: '保持中',
+      phase: this.config.mode === 'cardio' ? '计时中' : '保持中',
       repCount: 0,
       currentScore: this.scoring ? this.scoring.scoreHold(passRate) : 0,
       holdElapsedMs: this.holdElapsedMs,
@@ -479,7 +479,7 @@ export class PoseEngine {
       };
     }
 
-    if (config.mode === 'hold') {
+    if (config.mode !== 'reps') {
       const passRate = this.computePassRate();
       const avgScore = this.scoring ? this.scoring.scoreHold(passRate) : 0;
       return {
@@ -489,7 +489,7 @@ export class PoseEngine {
         startedAt: this.startedAtIso || endedAtIso,
         endedAt: endedAtIso,
         durationMs,
-        mode: 'hold',
+        mode: config.mode === 'cardio' ? 'cardio' : 'hold',
         totalReps: 0,
         passReps: 0,
         avgScore,

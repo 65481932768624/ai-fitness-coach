@@ -10,7 +10,7 @@
  * 引擎不硬编码任何动作参数，全部来自配置。
  */
 
-import { calcJointAngle } from './angleCalculator';
+import { calcHorizontalDistance, calcJointAngle, calcVerticalAngle } from './angleCalculator';
 import { ConfidenceGate } from './confidenceGate';
 import type { ExerciseConfig, ExercisePhase, JointRule } from '../types/exercise';
 import type { Landmark } from '../types/pose';
@@ -88,7 +88,7 @@ export class RuleEngine {
     if (!this.gate.isTripleValid(landmarks, rule.triple)) {
       return null;
     }
-    const angle = calcJointAngle(landmarks, rule.triple);
+    const angle = this.measure(landmarks, rule);
     const [low, high] = rule.targetRange;
 
     if (angle < low) {
@@ -114,6 +114,31 @@ export class RuleEngine {
       };
     }
     return null;
+  }
+
+  /**
+   * 按规则声明的度量方式取值。
+   *
+   * - angle（默认）：三点夹角
+   * - vAngle：a-b 连线与竖直方向夹角，用于躯干前倾/后仰
+   * - hDist：a-b 水平距离百分比，用于膝内扣、双膝间距
+   */
+  private measure(landmarks: Landmark[], rule: JointRule): number {
+    const t = rule.triple;
+    const metric = rule.metric ?? 'angle';
+    const pa = landmarks[t.a];
+    const pb = landmarks[t.b];
+    if (!pa || !pb) {
+      return 0;
+    }
+    if (metric === 'vAngle') {
+      return calcVerticalAngle(pa, pb);
+    }
+    if (metric === 'hDist') {
+      // 百分比，便于阈值阅读（0.08 → 8）
+      return Math.round(calcHorizontalDistance(pa, pb) * 1000) / 10;
+    }
+    return calcJointAngle(landmarks, t);
   }
 
   /** 获取动作配置 */

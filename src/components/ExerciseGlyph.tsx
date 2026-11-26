@@ -133,6 +133,102 @@ const PATHS: Record<string, JSX.Element> = {
       <path d="m12 13 2.6 5.6" />
     </>
   ),
+  // ---- v8 新增家族 ----
+  hinge: (
+    <>
+      <circle cx="15.6" cy="6.4" r="1.8" fill="currentColor" stroke="none" />
+      <path d="M14.4 8 9.6 11.4" />
+      <path d="M9.6 11.4 9.4 15" />
+      <path d="M9.4 15 7.4 19.6" />
+      <path d="M9.4 15 11.6 19.6" />
+      <path d="M4 19.6h16" strokeDasharray="1.5 2.4" opacity="0.4" />
+    </>
+  ),
+  lunge: (
+    <>
+      <circle cx="12" cy="4.6" r="1.8" fill="currentColor" stroke="none" />
+      <path d="M12 6.5v5" />
+      <path d="M12 11.5 7.6 14.4" />
+      <path d="M7.6 14.4 6 19.4" />
+      <path d="M12 11.5 16.4 14.4" />
+      <path d="M16.4 14.4 18.4 19.4" />
+    </>
+  ),
+  bridge: (
+    <>
+      <circle cx="5.4" cy="12.6" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M7 13 12 10" />
+      <path d="M12 10 16.6 13.4" />
+      <path d="M16.6 13.4 18.4 18.6" />
+      <path d="M7 13 6 18.6" />
+      <path d="M4 19h17" strokeDasharray="1.5 2.4" opacity="0.4" />
+    </>
+  ),
+  curl: (
+    <>
+      <circle cx="8" cy="5" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M8.6 6.6 10.6 12" />
+      <path d="M10.6 12 15.4 9.4" />
+      <path d="M15.4 9.4 17.6 11.4" />
+    </>
+  ),
+  triceps: (
+    <>
+      <circle cx="7.4" cy="6" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M8 7.6 10.4 12.6" />
+      <path d="M10.4 12.6 15 15.6" />
+      <path d="M15 15.6 17.4 13" />
+    </>
+  ),
+  raise: (
+    <>
+      <circle cx="12" cy="5" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M12 6.8v5" />
+      <path d="M12 8.6 6.4 8.2" />
+      <path d="M12 8.6 17.6 8.2" />
+      <path d="M12 11.8 9 19" />
+      <path d="M12 11.8 15 19" />
+    </>
+  ),
+  calf: (
+    <>
+      <path d="M6 19.6h9" />
+      <path d="M12 5v9" />
+      <path d="M12 14 10.6 19.6" />
+      <path d="M12 14 13.8 19.6" />
+      <path d="M9 19.6 6.4 17.6" />
+      <circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none" />
+    </>
+  ),
+  crunch: (
+    <>
+      <circle cx="6.6" cy="9.4" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M8.2 10.2 13.4 12.6" />
+      <path d="M13.4 12.6 16.6 9.4" />
+      <path d="M16.6 9.4 19.4 12.2" />
+      <path d="M4 19h16" strokeDasharray="1.5 2.4" opacity="0.4" />
+    </>
+  ),
+  cardio: (
+    <>
+      <circle cx="10" cy="5" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M10 6.8 12 11" />
+      <path d="M12 11 6.6 14.6" />
+      <path d="M12 11 16 14.4" />
+      <path d="M6.6 14.6 5.4 19.6" />
+      <path d="M16 14.4 18.2 19.6" />
+      <path d="M2 20.2h20" strokeDasharray="1.5 2.4" opacity="0.4" />
+    </>
+  ),
+  leg: (
+    <>
+      <circle cx="9" cy="5" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M9 6.8 10.4 12" />
+      <path d="M10.4 12 15.6 13.4" />
+      <path d="M15.6 13.4 16.4 18.6" />
+      <path d="M4 19h17" strokeDasharray="1.5 2.4" opacity="0.4" />
+    </>
+  ),
 };
 
 /** 兜底图标（未注册的动作） */
@@ -176,6 +272,12 @@ export const BODY_TONE: Record<string, { bg: string; text: string; dot: string }
   chest: { bg: 'bg-[#E9EFEE]', text: 'text-[#2C5450]', dot: 'bg-[#5FA79A]' },
   core: { bg: 'bg-[#F2EEE6]', text: 'text-[#7A6338]', dot: 'bg-[#C4A46B]' },
   back: { bg: 'bg-[#EEECF6]', text: 'text-[#4C4370]', dot: 'bg-[#8E7CC3]' },
+  glutes: { bg: 'bg-[#F7EBEF]', text: 'text-[#7A3E52]', dot: 'bg-[#C97B96]' },
+  shoulders: { bg: 'bg-[#E9F1F5]', text: 'text-[#2F5666]', dot: 'bg-[#6FA8BE]' },
+  arms: { bg: 'bg-[#F2EFE8]', text: 'text-[#6B5B33]', dot: 'bg-[#C2A45E]' },
+  calves: { bg: 'bg-[#EDF2EE]', text: 'text-[#3D5E45]', dot: 'bg-[#7FA98A]' },
+  forearms: { bg: 'bg-[#F0EEF3]', text: 'text-[#544A63]', dot: 'bg-[#9A8CB0]' },
+  cardio: { bg: 'bg-[#FBEEEA]', text: 'text-[#8A4433]', dot: 'bg-[#D2705A]' },
 };
 
 export default ExerciseGlyph;

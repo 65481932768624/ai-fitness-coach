@@ -19,6 +19,7 @@ import { benchPressConfig } from './benchpress';
 import { pushupConfig } from './pushup';
 import { squatConfig } from './squat';
 import { LIBRARY } from './library.generated';
+import { LIBRARY2 } from './library2.generated';
 export type { LibraryEntry } from './library-types';
 
 /** 动作注册表：id → 配置（手写旗舰动作优先） */
@@ -66,11 +67,17 @@ export function buildExercise(entry: LibraryEntry): ExerciseConfig {
   };
 }
 
-// 注册库动作（跳过与手写动作重复的 id）
+// 注册第一批库动作（跳过与手写动作重复的 id）
 for (const entry of LIBRARY) {
   if (entry.id in EXERCISE_REGISTRY) {
     continue;
   }
+  EXERCISE_REGISTRY[entry.id] = buildExercise(entry);
+}
+
+// 注册第二批（腿臀肩臂核心）；同 id 时覆盖第一批，
+// 因为手册版内容更完整（含五步拆解、关键要点与常见错误）
+for (const entry of LIBRARY2) {
   EXERCISE_REGISTRY[entry.id] = buildExercise(entry);
 }
 
